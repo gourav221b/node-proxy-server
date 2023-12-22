@@ -8,8 +8,11 @@ const app = express();
 
 // Environment variables
 const targetUrl = process.env.TARGET_URL;
+const targetPoemUrl = process.env.TARGET_URL_POEM;
+const targetGameUrl = process.env.TARGET_URL_GAME;
 
 const port = process.env.PORT || 8000;
+
 // CORS 
 app.use(cors({
     origin: '*'
@@ -17,15 +20,29 @@ app.use(cors({
 
 // Compress responses
 app.use(compression());
-
-// Create proxy
-const proxy = createProxyMiddleware({
+const proxyJoke = createProxyMiddleware({
     target: targetUrl,
     changeOrigin: true,
     pathRewrite: {
-        [`^/proxy`]: ''
+        [`^/joke`]: ''
     },
+});
+// Create proxy for /poem
+const proxyPoem = createProxyMiddleware({
+    target: targetPoemUrl,
+    changeOrigin: true,
+    pathRewrite: {
+        [`^/poem`]: ''
+    },
+});
 
+// Create proxy for /game
+const proxyGame = createProxyMiddleware({
+    target: targetGameUrl,
+    changeOrigin: true,
+    pathRewrite: {
+        [`^/game`]: ''
+    },
 });
 
 // Validate headers
@@ -45,7 +62,13 @@ app.use((req, res, next) => {
 });
 
 // Proxy requests
-app.use('/proxy', proxy, (req, res) => {
+app.use('/joke', proxyJoke, (req, res) => {
+    console.log(req.body)
+});
+app.use('/poem', proxyPoem, (req, res) => {
+    console.log(req.body)
+});
+app.use('/game', proxyGame, (req, res) => {
     console.log(req.body)
 });
 
